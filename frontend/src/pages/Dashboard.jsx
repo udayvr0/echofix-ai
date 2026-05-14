@@ -8,7 +8,7 @@ export default function Dashboard() {
       <div className="p-8">
 
         <h1 className="text-5xl font-bold text-cyan-400">
-          DEADPOOL AI
+          EchoFix AI
         </h1>
 
         <p className="text-slate-400 mt-2">

@@ -17,7 +17,7 @@ def health_api(req: func.HttpRequest) -> func.HttpResponse:
     return func.HttpResponse(
         json.dumps({
             "status": "healthy",
-            "service": "Deadpool AI Backend"
+            "service": "EchoFix AI Backend"
         }),
         mimetype="application/json",
         status_code=200
