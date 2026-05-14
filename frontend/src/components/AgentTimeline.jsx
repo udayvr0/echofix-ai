@@ -45,7 +45,16 @@ export default function AgentTimeline({ result }) {
 
                     <div
                         key={step.key}
-                        className="bg-slate-950 border border-slate-800 rounded-xl p-5"
+                        className="
+                        bg-slate-950
+                        border
+                        border-slate-800
+                        rounded-2xl
+                        p-5
+                        hover:border-cyan-500/40
+                        transition-all
+                        duration-300
+                        "
                     >
 
                         <div className="flex items-center justify-between">
@@ -54,8 +63,14 @@ export default function AgentTimeline({ result }) {
                                 {step.title}
                             </h3>
 
-                            <div className="text-green-400 text-sm font-medium">
-                                COMPLETED
+                            <div className="flex items-center gap-2">
+
+                                <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></div>
+
+                                <div className="text-green-400 text-sm font-medium">
+                                    COMPLETED
+                                </div>
+
                             </div>
 
                         </div>
