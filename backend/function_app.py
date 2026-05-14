@@ -2,26 +2,102 @@ import azure.functions as func
 import datetime
 import json
 import logging
+import uuid
+
+from simulators.api_failure_simulator.simulator import trigger_api_failure
+from services.incident_store import get_all_incidents
+from orchestration.langgraph_flow import graph
+from services.incident_store import get_incident_by_id
 
 app = func.FunctionApp()
 
 @app.route(route="health_api", auth_level=func.AuthLevel.ANONYMOUS)
 def health_api(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Python HTTP trigger function processed a request.')
 
-    name = req.params.get('name')
-    if not name:
-        try:
-            req_body = req.get_json()
-        except ValueError:
-            pass
-        else:
-            name = req_body.get('name')
+    return func.HttpResponse(
+        json.dumps({
+            "status": "healthy",
+            "service": "Deadpool AI Backend"
+        }),
+        mimetype="application/json",
+        status_code=200
+    )
 
-    if name:
-        return func.HttpResponse(f"Hello, {name}. This HTTP triggered function executed successfully.")
-    else:
+
+@app.route(route="trigger_incident_api", auth_level=func.AuthLevel.ANONYMOUS)
+def trigger_incident_api(req: func.HttpRequest) -> func.HttpResponse:
+
+    incident = trigger_api_failure()
+
+    response = {
+        "incidentId": incident.incident_id,
+        "incidentType": incident.incident_type,
+        "severity": incident.severity,
+        "status": incident.status,
+        "description": incident.description
+    }
+
+    return func.HttpResponse(
+        json.dumps(response),
+        mimetype="application/json",
+        status_code=200
+    )
+
+@app.route(route="get_incidents_api", auth_level=func.AuthLevel.ANONYMOUS)
+def get_incidents_api(req: func.HttpRequest) -> func.HttpResponse:
+
+    incidents = get_all_incidents()
+
+    response = []
+
+    for incident in incidents:
+        response.append({
+            "incidentId": incident.incident_id,
+            "incidentType": incident.incident_type,
+            "severity": incident.severity,
+            "status": incident.status,
+            "description": incident.description,
+            "affectedService": incident.affected_service
+        })
+
+    return func.HttpResponse(
+        json.dumps(response),
+        mimetype="application/json",
+        status_code=200
+    )
+
+@app.route(route="orchestrate_incident_api", auth_level=func.AuthLevel.ANONYMOUS)
+def orchestrate_incident_api(req: func.HttpRequest) -> func.HttpResponse:
+
+    incident_id = req.params.get("incidentId")
+
+    incident = get_incident_by_id(incident_id)
+
+    if not incident:
         return func.HttpResponse(
-             "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
-             status_code=200
+            "Incident not found.",
+            status_code=404
         )
+
+    initial_state = {
+        "incident_id": incident.incident_id,
+        "incident_type": incident.incident_type,
+        "severity": incident.severity,
+        "description": incident.description,
+
+        "monitoring_result": {},
+        "rootcause_result": {},
+        "recovery_result": {},
+        "security_result": {},
+
+        "approval_status": "APPROVED",
+        "final_status": "PROCESSING"
+    }
+
+    result = graph.invoke(initial_state)
+
+    return func.HttpResponse(
+        json.dumps(result, default=str),
+        mimetype="application/json",
+        status_code=200
+    )
