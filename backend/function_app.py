@@ -8,6 +8,7 @@ from simulators.api_failure_simulator.simulator import trigger_api_failure
 from services.incident_store import get_all_incidents
 from orchestration.langgraph_flow import graph
 from services.incident_store import get_incident_by_id
+from services.incident_store import update_incident_status
 
 app = func.FunctionApp()
 
@@ -95,6 +96,7 @@ def orchestrate_incident_api(req: func.HttpRequest) -> func.HttpResponse:
     }
 
     result = graph.invoke(initial_state)
+    update_incident_status(incident.incident_id, result["final_status"])
 
     return func.HttpResponse(
         json.dumps(result, default=str),

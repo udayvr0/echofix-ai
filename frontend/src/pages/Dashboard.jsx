@@ -45,21 +45,23 @@ export default function Dashboard() {
     const result = await orchestrateIncident(incidentId)
 
     setSelectedResult(result)
-
+    
     const confidence =
-      result?.confidence_result?.confidence_score || 0
-
+    result?.confidence_result?.confidence_score || 0
+    
     const resolved =
-      result?.final_status === "RESOLVED" ? 1 : 0
-
+    result?.final_status === "RESOLVED" ? 1 : 0
+    
     const recoveries =
-      result?.execution_result?.success ? 1 : 0
-
+    result?.execution_result?.success ? 1 : 0
+    
     setMetrics((prev) => ({
       resolved: prev.resolved + resolved,
       confidence,
       recoveries: prev.recoveries + recoveries
     }))
+    
+    await loadIncidents()
   }
 
 

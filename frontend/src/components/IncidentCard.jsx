@@ -4,17 +4,20 @@ export default function IncidentCard({
 }) {
 
     return (
-        <div className="
-            bg-slate-900
+        <div className={`
             border
-            border-slate-800
             rounded-2xl
             p-5
-            hover:border-cyan-500
-            hover:shadow-[0_0_25px_rgba(6,182,212,0.15)]
             transition-all
             duration-300
-            ">
+            hover:shadow-[0_0_25px_rgba(6,182,212,0.15)]
+
+            ${incident.status === "RESOLVED"
+                ? "bg-slate-950 border-green-500/30"
+                : "bg-slate-900 border-slate-800 hover:border-cyan-500"
+            }
+            `}
+        >
 
             <div className="flex items-center justify-between">
 
@@ -31,19 +34,68 @@ export default function IncidentCard({
                     </p>
                 </div>
 
-                <div className="bg-red-500/20 text-red-400 px-3 py-1 rounded-lg text-sm">
-                    {incident.severity}
+                <div className="flex flex-col items-end gap-2">
+
+                    <div className="bg-red-500/20 text-red-400 px-3 py-1 rounded-lg text-sm">
+                        {incident.severity}
+                    </div>
+
+                    <div className={`
+                        px-3
+                        py-1
+                        rounded-lg
+                        text-xs
+                        font-semibold
+
+                        ${incident.status === "RESOLVED"
+                                                ? "bg-green-500/20 text-green-400"
+                                                : "bg-yellow-500/20 text-yellow-400"
+                        }
+                    `}
+                    >
+                        {incident.status}
+                    </div>
+
                 </div>
 
             </div>
 
             <div className="mt-4">
-                <button
-                    onClick={() => onOrchestrate(incident.incidentId)}
-                    className="bg-cyan-500 hover:bg-cyan-400 transition px-4 py-2 rounded-lg text-black font-semibold"
-                >
-                    Start Recovery
-                </button>
+                {incident.status === "RESOLVED" ? (
+
+                    <div className="
+                        bg-green-500/20
+                        text-green-400
+                        px-4
+                        py-2
+                        rounded-xl
+                        inline-flex
+                        items-center
+                        font-semibold
+                        "
+                    >
+                        Recovery Completed
+                    </div>
+
+                ) : (
+
+                    <button
+                        onClick={() => onOrchestrate(incident.incidentId)}
+                        className="
+                        bg-cyan-500
+                        hover:bg-cyan-400
+                        transition
+                        px-4
+                        py-2
+                        rounded-xl
+                        text-black
+                        font-semibold
+                        "
+                    >
+                        Start Recovery
+                    </button>
+
+                )}
             </div>
 
         </div>
