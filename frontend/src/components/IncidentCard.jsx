@@ -1,9 +1,11 @@
 export default function IncidentCard({
     incident,
-    onOrchestrate
+    onOrchestrate,
+    onApprove
 }) {
 
     return (
+
         <div className={`
             border
             rounded-2xl
@@ -14,14 +16,16 @@ export default function IncidentCard({
 
             ${incident.status === "RESOLVED"
                 ? "bg-slate-950 border-green-500/30"
-                : "bg-slate-900 border-slate-800 hover:border-cyan-500"
+                : incident.status === "WAITING_FOR_APPROVAL"
+                    ? "bg-slate-950 border-yellow-500/30"
+                    : "bg-slate-900 border-slate-800 hover:border-cyan-500"
             }
-            `}
-        >
+        `}>
 
             <div className="flex items-center justify-between">
 
                 <div>
+
                     <h2 className="text-lg font-semibold text-white">
                         {incident.incidentType}
                     </h2>
@@ -29,9 +33,11 @@ export default function IncidentCard({
                     <p className="text-slate-400 text-sm mt-1">
                         {incident.description}
                     </p>
+
                     <p className="text-slate-500 text-xs mt-3">
                         Detected 12 seconds ago
                     </p>
+
                 </div>
 
                 <div className="flex flex-col items-end gap-2">
@@ -48,11 +54,12 @@ export default function IncidentCard({
                         font-semibold
 
                         ${incident.status === "RESOLVED"
-                                                ? "bg-green-500/20 text-green-400"
-                                                : "bg-yellow-500/20 text-yellow-400"
+                            ? "bg-green-500/20 text-green-400"
+                            : incident.status === "WAITING_FOR_APPROVAL"
+                                ? "bg-yellow-500/20 text-yellow-400"
+                                : "bg-cyan-500/20 text-cyan-400"
                         }
-                    `}
-                    >
+                    `}>
                         {incident.status}
                     </div>
 
@@ -61,6 +68,7 @@ export default function IncidentCard({
             </div>
 
             <div className="mt-4">
+
                 {incident.status === "RESOLVED" ? (
 
                     <div className="
@@ -72,32 +80,51 @@ export default function IncidentCard({
                         inline-flex
                         items-center
                         font-semibold
-                        "
-                    >
+                    ">
                         Recovery Completed
                     </div>
+
+                ) : incident.status === "WAITING_FOR_APPROVAL" ? (
+
+                    <button
+                        onClick={() => onApprove(incident.incidentId)}
+                        className="
+                            bg-yellow-500
+                            hover:bg-yellow-400
+                            transition
+                            px-4
+                            py-2
+                            rounded-xl
+                            text-black
+                            font-semibold
+                        "
+                    >
+                        Approve Recovery
+                    </button>
 
                 ) : (
 
                     <button
                         onClick={() => onOrchestrate(incident.incidentId)}
                         className="
-                        bg-cyan-500
-                        hover:bg-cyan-400
-                        transition
-                        px-4
-                        py-2
-                        rounded-xl
-                        text-black
-                        font-semibold
+                            bg-cyan-500
+                            hover:bg-cyan-400
+                            transition
+                            px-4
+                            py-2
+                            rounded-xl
+                            text-black
+                            font-semibold
                         "
                     >
                         Start Recovery
                     </button>
 
                 )}
+
             </div>
 
         </div>
+
     )
 }

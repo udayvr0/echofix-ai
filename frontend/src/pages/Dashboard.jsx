@@ -9,7 +9,8 @@ import SectionContainer from "../components/SectionContainer"
 import {
   getIncidents,
   triggerIncident,
-  orchestrateIncident
+  orchestrateIncident,
+  approveRecovery
 } from "../services/api"
 
 
@@ -39,32 +40,44 @@ export default function Dashboard() {
     await loadIncidents()
   }
 
-
+  
+  
   async function handleOrchestrate(incidentId) {
-
+    
     const result = await orchestrateIncident(incidentId)
-
+    
     setSelectedResult(result)
     
     const confidence =
     result?.confidence_result?.confidence_score || 0
     
     const resolved =
-    result?.final_status === "RESOLVED" ? 1 : 0
-    
-    const recoveries =
-    result?.execution_result?.success ? 1 : 0
-    
-    setMetrics((prev) => ({
-      resolved: prev.resolved + resolved,
+      result?.final_status === "RESOLVED" ? 1 : 0
+      
+      const recoveries =
+      result?.execution_result?.success ? 1 : 0
+      
+      setMetrics((prev) => ({
+        resolved: prev.resolved + resolved,
       confidence,
       recoveries: prev.recoveries + recoveries
     }))
     
     await loadIncidents()
   }
+  
+  async function handleApproveRecovery(incidentId) {
 
+    const result = await approveRecovery(incidentId)
 
+    setSelectedResult((prev) => ({
+      ...prev,
+      ...result
+    }))
+
+    await loadIncidents()
+  }
+  
   useEffect(() => {
     loadIncidents()
   }, [])
@@ -89,7 +102,7 @@ export default function Dashboard() {
 
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-10">
 
           <MetricCard
             title="Active Incidents"
@@ -140,15 +153,15 @@ export default function Dashboard() {
             <button
               onClick={handleTriggerIncident}
               className="
-        bg-cyan-500
-        hover:bg-cyan-400
-        transition
-        text-black
-        font-semibold
-        px-5
-        py-3
-        rounded-xl
-      "
+              bg-cyan-500
+              hover:bg-cyan-400
+              transition
+              text-black
+              font-semibold
+              px-5
+              py-3
+              rounded-xl
+              "
             >
               Simulate Incident
             </button>
@@ -162,6 +175,7 @@ export default function Dashboard() {
                 key={incident.incidentId}
                 incident={incident}
                 onOrchestrate={handleOrchestrate}
+                onApprove={handleApproveRecovery}
               />
             ))}
 
@@ -178,13 +192,14 @@ export default function Dashboard() {
           >
 
             <div className="
-      bg-slate-950
-      border
-      border-slate-800
-      rounded-2xl
-      p-6
-      mb-6
-    ">
+            bg-slate-950
+            border
+            border-slate-800
+            rounded-2xl
+            p-6
+            mb-6
+            "
+            >
 
               <div className="flex items-center justify-between">
 
@@ -201,13 +216,14 @@ export default function Dashboard() {
                 </div>
 
                 <div className="
-          bg-green-500/20
-          text-green-400
-          px-5
-          py-3
-          rounded-2xl
-          font-bold
-        ">
+                  bg-green-500/20
+                  text-green-400
+                  px-5
+                  py-3
+                  rounded-2xl
+                  font-bold
+                  "
+                >
                   {selectedResult.final_status}
                 </div>
 

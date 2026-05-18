@@ -51,7 +51,7 @@ def confidence_node(state):
     result = evaluate_recovery_confidence(state)
 
     state["confidence_result"] = result.__dict__
-    state["final_status"] = "READY_FOR_APPROVAL"
+    state["final_status"] = "WAITING_FOR_APPROVAL"
 
     return state
 
@@ -100,8 +100,6 @@ workflow.add_edge("monitoring", "rootcause")
 workflow.add_edge("rootcause", "recovery")
 workflow.add_edge("recovery", "security")
 workflow.add_edge("security", "confidence")
-workflow.add_edge("confidence", "execution")
-workflow.add_edge("execution", "validation")
-workflow.add_edge("validation", END)
+workflow.add_edge("confidence", END)
 
 graph = workflow.compile()
