@@ -28,3 +28,12 @@ export async function orchestrateIncident(incidentId) {
 
   return response.json()
 }
+
+export async function approveRecovery(incidentId) {
+
+  const response = await fetch(
+    `${API_BASE_URL}/approve_recovery_api?incidentId=${incidentId}`
+  )
+
+  return response.json()
+}

@@ -9,6 +9,8 @@ from services.incident_store import get_all_incidents
 from orchestration.langgraph_flow import graph
 from services.incident_store import get_incident_by_id
 from services.incident_store import update_incident_status
+from services.execution_service import execute_recovery_plan
+from services.validation_service import validate_recovery
 
 app = func.FunctionApp()
 
@@ -100,6 +102,42 @@ def orchestrate_incident_api(req: func.HttpRequest) -> func.HttpResponse:
 
     return func.HttpResponse(
         json.dumps(result, default=str),
+        mimetype="application/json",
+        status_code=200
+    )
+
+@app.route(route="approve_recovery_api", auth_level=func.AuthLevel.ANONYMOUS)
+def approve_recovery_api(req: func.HttpRequest) -> func.HttpResponse:
+
+    incident_id = req.params.get("incidentId")
+
+    incident = get_incident_by_id(incident_id)
+
+    if not incident:
+        return func.HttpResponse(
+            "Incident not found.",
+            status_code=404
+        )
+
+    execution_result = execute_recovery_plan({
+        "incident_type": incident.incident_type
+    })
+
+    validation_result = validate_recovery({})
+
+    update_incident_status(
+        incident.incident_id,
+        "RESOLVED"
+    )
+
+    response = {
+        "execution_result": execution_result.__dict__,
+        "validation_result": validation_result,
+        "final_status": "RESOLVED"
+    }
+
+    return func.HttpResponse(
+        json.dumps(response),
         mimetype="application/json",
         status_code=200
     )

@@ -1,15 +1,17 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
 import MainLayout from "../layouts/MainLayout"
 import IncidentCard from "../components/IncidentCard"
 import AgentTimeline from "../components/AgentTimeline"
 import MetricCard from "../components/MetricCard"
 import SectionContainer from "../components/SectionContainer"
+import AIDecisionPanel from "../components/AIDecisionPanel"
 
 import {
   getIncidents,
   triggerIncident,
-  orchestrateIncident
+  orchestrateIncident,
+  approveRecovery
 } from "../services/api"
 
 
@@ -17,11 +19,19 @@ export default function Dashboard() {
 
   const [incidents, setIncidents] = useState([])
   const [selectedResult, setSelectedResult] = useState(null)
+  const [animationComplete, setAnimationComplete] = useState(false)
   const [metrics, setMetrics] = useState({
     resolved: 0,
     confidence: 0,
     recoveries: 0
   })
+  const [visibleAgents, setVisibleAgents] = useState(0)
+  const [runningAgentIndex, setRunningAgentIndex] = useState(-1)
+  const orchestrationRef = useRef(null)
+  const timelineScrollRef = useRef(null)
+  const [executionVisibleAgents, setExecutionVisibleAgents] = useState(0)
+  const [executionRunningIndex, setExecutionRunningIndex] = useState(-1)
+  const [executionComplete, setExecutionComplete] = useState(false)
 
 
   async function loadIncidents() {
@@ -42,28 +52,134 @@ export default function Dashboard() {
 
   async function handleOrchestrate(incidentId) {
 
+    setVisibleAgents(0)
+    setRunningAgentIndex(-1)
+    setAnimationComplete(false)
+
     const result = await orchestrateIncident(incidentId)
 
     setSelectedResult(result)
-    
+
+    setTimeout(() => {
+
+      orchestrationRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      })
+
+    }, 300)
+
+    for (let i = 0; i < 5; i++) {
+
+      setTimeout(() => {
+
+        setVisibleAgents(i + 1)
+        setRunningAgentIndex(i)
+        setTimeout(() => {
+
+          if (timelineScrollRef.current) {
+
+            timelineScrollRef.current.scrollTo({
+              top: timelineScrollRef.current.scrollHeight,
+              behavior: "smooth"
+            })
+          }
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: "smooth"
+          })
+
+        }, 150)
+
+      }, (i + 1) * 1200)
+
+    }
+
+    setTimeout(() => {
+
+      setRunningAgentIndex(-1)
+      setAnimationComplete(true)
+
+    }, 7800)
+
     const confidence =
-    result?.confidence_result?.confidence_score || 0
-    
+      result?.confidence_result?.confidence_score || 0
+
     const resolved =
-    result?.final_status === "RESOLVED" ? 1 : 0
-    
+      result?.final_status === "RESOLVED" ? 1 : 0
+
     const recoveries =
-    result?.execution_result?.success ? 1 : 0
-    
+      result?.execution_result?.success ? 1 : 0
+
     setMetrics((prev) => ({
       resolved: prev.resolved + resolved,
       confidence,
       recoveries: prev.recoveries + recoveries
     }))
-    
+
     await loadIncidents()
   }
 
+  async function handleApproveRecovery(incidentId) {
+
+    setExecutionVisibleAgents(0)
+    setExecutionRunningIndex(-1)
+    setExecutionComplete(false)
+
+    setTimeout(() => {
+
+      orchestrationRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      })
+
+    }, 300)
+
+    for (let i = 0; i < 3; i++) {
+
+      setTimeout(() => {
+
+        setExecutionVisibleAgents(i + 1)
+        setExecutionRunningIndex(i)
+
+        setTimeout(() => {
+
+          if (timelineScrollRef.current) {
+
+            timelineScrollRef.current.scrollTo({
+              top: timelineScrollRef.current.scrollHeight,
+              behavior: "smooth"
+            })
+
+          }
+
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: "smooth"
+          })
+
+        }, 150)
+
+      }, (i + 1) * 1400)
+
+    }
+
+    setTimeout(async () => {
+
+      setExecutionRunningIndex(-1)
+      setExecutionComplete(true)
+
+      const result = await approveRecovery(incidentId)
+
+      setSelectedResult((prev) => ({
+        ...prev,
+        ...result
+      }))
+
+      await loadIncidents()
+
+    }, 5500)
+  }
 
   useEffect(() => {
     loadIncidents()
@@ -89,7 +205,7 @@ export default function Dashboard() {
 
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-10">
 
           <MetricCard
             title="Active Incidents"
@@ -140,15 +256,15 @@ export default function Dashboard() {
             <button
               onClick={handleTriggerIncident}
               className="
-        bg-cyan-500
-        hover:bg-cyan-400
-        transition
-        text-black
-        font-semibold
-        px-5
-        py-3
-        rounded-xl
-      "
+              bg-cyan-500
+              hover:bg-cyan-400
+              transition
+              text-black
+              font-semibold
+              px-5
+              py-3
+              rounded-xl
+              "
             >
               Simulate Incident
             </button>
@@ -162,6 +278,7 @@ export default function Dashboard() {
                 key={incident.incidentId}
                 incident={incident}
                 onOrchestrate={handleOrchestrate}
+                onApprove={handleApproveRecovery}
               />
             ))}
 
@@ -169,61 +286,101 @@ export default function Dashboard() {
 
         </SectionContainer>
 
-
         {selectedResult && (
 
           <SectionContainer
-            title="Recovery Orchestration Center"
-            subtitle="AI agent swarm execution lifecycle and autonomous recovery coordination."
+            title="AI Decision Intelligence Center"
+            subtitle="Explainable AI reasoning, operational analysis, and recovery strategy generation."
           >
 
-            <div className="
-      bg-slate-950
-      border
-      border-slate-800
-      rounded-2xl
-      p-6
-      mb-6
-    ">
-
-              <div className="flex items-center justify-between">
-
-                <div>
-
-                  <h3 className="text-2xl font-bold text-cyan-400">
-                    Incident Lifecycle Status
-                  </h3>
-
-                  <p className="text-slate-400 mt-2">
-                    Final orchestration execution state
-                  </p>
-
-                </div>
-
-                <div className="
-          bg-green-500/20
-          text-green-400
-          px-5
-          py-3
-          rounded-2xl
-          font-bold
-        ">
-                  {selectedResult.final_status}
-                </div>
-
-              </div>
-
-            </div>
-
-            <div className="max-h-[700px] overflow-y-auto pr-2">
-
-              <AgentTimeline result={selectedResult} />
-
-            </div>
+            <AIDecisionPanel result={selectedResult} />
 
           </SectionContainer>
 
         )}
+
+
+        {selectedResult && (
+
+          <div ref={orchestrationRef}>
+
+            <SectionContainer
+              title="Recovery Orchestration Center"
+              subtitle="AI agent swarm execution lifecycle and autonomous recovery coordination."
+            >
+
+              <div className={`
+                transition-all
+                duration-500
+                ${animationComplete
+                  ? "opacity-100 max-h-[300px]"
+                  : "opacity-0 max-h-0 overflow-hidden"
+                }
+              `}
+              >
+
+                <div className="
+                  bg-slate-950
+                  border
+                  border-slate-800
+                  rounded-2xl
+                  p-6
+                  mb-6
+                  "
+                >
+
+                  <div className="flex items-center justify-between">
+
+                    <div>
+
+                      <h3 className="text-2xl font-bold text-cyan-400">
+                        Incident Lifecycle Status
+                      </h3>
+
+                      <p className="text-slate-400 mt-2">
+                        Final orchestration execution state
+                      </p>
+
+                    </div>
+
+                    <div className="
+                      bg-green-500/20
+                      text-green-400
+                      px-5
+                      py-3
+                      rounded-2xl
+                      font-bold
+                      "
+                    >
+                      {selectedResult.final_status}
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+
+              <div
+                ref={timelineScrollRef}
+                className="max-h-[700px] overflow-y-auto pr-2"
+              >
+
+                <AgentTimeline
+                  result={selectedResult}
+                  visibleAgents={visibleAgents}
+                  animationComplete={animationComplete}
+                  runningAgentIndex={runningAgentIndex}
+                  executionVisibleAgents={executionVisibleAgents}
+                  executionRunningIndex={executionRunningIndex}
+                  executionComplete={executionComplete}
+                />
+
+              </div>
+
+            </SectionContainer>
+          </div>
+        )
+        }
 
       </div>
 
