@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -22,4 +23,29 @@ body {
   background-color: #020617;
   color: white;
   font-family: Arial, sans-serif;
+}
+
+/* GLOBAL DARK SCROLLBARS */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 999px;
+  border: 2px solid #020617;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+html {
+  scroll-behavior: smooth;
 }

@@ -59,7 +59,7 @@ export default function AgentTimeline({
 
     return (
 
-        <div className="space-y-10">
+        <div className="space-y-6">
 
             {/* ANALYSIS PHASE */}
 
@@ -91,7 +91,7 @@ export default function AgentTimeline({
                                     border
                                     border-slate-800
                                     rounded-2xl
-                                    p-5
+                                    p-4
                                     animate-fadeIn
                                 "
                             >
@@ -120,7 +120,7 @@ export default function AgentTimeline({
 
                                             ${index === runningAgentIndex
                                                 ? "bg-yellow-400"
-                                                : "bg-green-400"
+                                                : "bg-emerald-400/20"
                                             }
                                         `}></div>
 
@@ -130,7 +130,7 @@ export default function AgentTimeline({
 
                                             ${index === runningAgentIndex
                                                 ? "text-yellow-400"
-                                                : "text-green-400"
+                                                : "text-emerald-300 border border-emerald-400/20"
                                             }
                                         `}>
 
@@ -152,6 +152,7 @@ export default function AgentTimeline({
                 </div>
 
             </div>
+            <div className="border-t border-white/10 pt-8"></div>
 
 
             {/* EXECUTION PHASE */}
@@ -199,7 +200,7 @@ export default function AgentTimeline({
                                             : "border-green-500/20"
                                         }
                                         rounded-2xl
-                                        p-5
+                                        p-4
                                         animate-fadeIn
                                         `}
                                 >
@@ -243,24 +244,32 @@ export default function AgentTimeline({
                                             `}></div>
 
                                             <div className={`
-                                                text-sm
-                                                font-semibold
+                                                    text-xs
+                                                    font-semibold
+                                                    px-3
+                                                    py-1
+                                                    rounded-full
+                                                    border
 
-                                                ${index === executionRunningIndex
-                                                    ? "bg-yellow-400"
+                                                    ${index === executionRunningIndex
+
+                                                    ? "bg-amber-400/10 text-amber-300 border-amber-400/20"
 
                                                     : isFailureFlow && index === 0
-                                                        ? "bg-red-400"
+
+                                                        ? "bg-rose-400/10 text-rose-300 border-rose-400/20"
 
                                                         : isFailureFlow && index === 1
-                                                            ? "bg-orange-400"
+
+                                                            ? "bg-orange-400/10 text-orange-300 border-orange-400/20"
 
                                                             : isFailureFlow && index === 2
-                                                                ? "bg-purple-400"
 
-                                                                : "bg-green-400"
-                                                }
-                                            `}>
+                                                                ? "bg-purple-400/10 text-purple-300 border-purple-400/20"
+
+                                                                : "bg-emerald-400/10 text-emerald-300 border-emerald-400/20"
+                                                    }
+                                                `}>
 
                                                 {index === executionRunningIndex
 

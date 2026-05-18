@@ -1,4 +1,4 @@
-export default function AIDecisionPanel({ result }) {
+export default function AIDecisionPanel({ result, animationComplete }) {
 
     if (!result) return null
 
@@ -92,7 +92,11 @@ export default function AIDecisionPanel({ result }) {
                     </div>
 
                     <div className="text-4xl font-bold text-cyan-400 mt-3 animate-pulse">
-                        {result?.confidence_result?.confidence_score}%
+                        {
+                            animationComplete
+                                ? `${result?.confidence_result?.confidence_score || 0}%`
+                                : "-"
+                        }
                     </div>
 
                 </div>
@@ -111,7 +115,11 @@ export default function AIDecisionPanel({ result }) {
                     </div>
 
                     <div className="text-4xl font-bold text-cyan-400 mt-3 animate-pulse">
-                        {result?.confidence_result?.operational_risk}
+                        {
+                            animationComplete
+                                ? result?.confidence_result?.operational_risk
+                                : "Calculating..."
+                        }
                     </div>
 
                 </div>
@@ -131,9 +139,11 @@ export default function AIDecisionPanel({ result }) {
 
                     <div className="text-sm xl:text-lg font-bold text-green-400 mt-3 leading-6 break-words animate-pulse">
                         {
-                            result?.confidence_result?.approval_recommendation === "SAFE_TO_EXECUTE"
-                                ? "Approved for Autonomous Recovery"
-                                : "Requires Human Escalation"
+                            animationComplete
+                                ? (result?.confidence_result?.approval_recommendation === "SAFE_TO_EXECUTE"
+                                    ? "Approved for Autonomous Recovery"
+                                    : "Requires Human Escalation")
+                                : "Pending Evaluation..."
                         }
                     </div>
 

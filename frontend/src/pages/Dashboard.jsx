@@ -317,7 +317,10 @@ export default function Dashboard() {
             subtitle="Explainable AI reasoning, operational analysis, and recovery strategy generation."
           >
 
-            <AIDecisionPanel result={selectedResult} />
+            <AIDecisionPanel
+              result={selectedResult}
+              animationComplete={animationComplete}
+            />
 
           </SectionContainer>
 
