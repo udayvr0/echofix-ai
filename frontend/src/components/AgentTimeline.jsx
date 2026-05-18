@@ -54,6 +54,9 @@ export default function AgentTimeline({
         }
     ]
 
+    const isFailureFlow =
+        result?.final_status === "MANUAL_INTERVENTION_REQUIRED"
+
     return (
 
         <div className="space-y-10">
@@ -159,8 +162,18 @@ export default function AgentTimeline({
 
                     <div className="mb-5">
 
-                        <h2 className="text-2xl font-bold text-green-400">
-                            Recovery Execution Phase
+                        <h2 className={`
+                                text-2xl
+                                font-bold
+                                ${isFailureFlow
+                                ? "text-red-400"
+                                : "text-green-400"
+                            }
+                            `}>
+                            {isFailureFlow
+                                ? "Recovery Failure Orchestration"
+                                : "Recovery Execution Phase"
+                            }
                         </h2>
 
                         <p className="text-slate-400 mt-2">
@@ -178,14 +191,17 @@ export default function AgentTimeline({
 
                                 <div
                                     key={index}
-                                    className="
+                                    className={`
                                         bg-slate-950
                                         border
-                                        border-green-500/20
+                                        ${isFailureFlow
+                                            ? "border-red-500/20"
+                                            : "border-green-500/20"
+                                        }
                                         rounded-2xl
                                         p-5
                                         animate-fadeIn
-                                    "
+                                        `}
                                 >
 
                                     <div className="flex items-center justify-between">
@@ -212,7 +228,17 @@ export default function AgentTimeline({
 
                                                 ${index === executionRunningIndex
                                                     ? "bg-yellow-400"
-                                                    : "bg-green-400"
+
+                                                    : isFailureFlow && index === 0
+                                                        ? "bg-red-400"
+
+                                                        : isFailureFlow && index === 1
+                                                            ? "bg-orange-400"
+
+                                                            : isFailureFlow && index === 2
+                                                                ? "bg-purple-400"
+
+                                                                : "bg-green-400"
                                                 }
                                             `}></div>
 
@@ -221,14 +247,35 @@ export default function AgentTimeline({
                                                 font-semibold
 
                                                 ${index === executionRunningIndex
-                                                    ? "text-yellow-400"
-                                                    : "text-green-400"
+                                                    ? "bg-yellow-400"
+
+                                                    : isFailureFlow && index === 0
+                                                        ? "bg-red-400"
+
+                                                        : isFailureFlow && index === 1
+                                                            ? "bg-orange-400"
+
+                                                            : isFailureFlow && index === 2
+                                                                ? "bg-purple-400"
+
+                                                                : "bg-green-400"
                                                 }
                                             `}>
 
                                                 {index === executionRunningIndex
+
                                                     ? "RUNNING"
-                                                    : "COMPLETED"
+
+                                                    : isFailureFlow && index === 0
+                                                        ? "FAILED"
+
+                                                        : isFailureFlow && index === 1
+                                                            ? "ROLLED BACK"
+
+                                                            : isFailureFlow && index === 2
+                                                                ? "ESCALATED"
+
+                                                                : "COMPLETED"
                                                 }
 
                                             </div>
