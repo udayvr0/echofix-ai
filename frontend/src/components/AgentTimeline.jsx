@@ -1,24 +1,12 @@
-
-import { useEffect, useRef } from "react"
-
 export default function AgentTimeline({
     result,
     visibleAgents,
     animationComplete,
-    runningAgentIndex
+    runningAgentIndex,
+    executionVisibleAgents,
+    executionRunningIndex,
+    executionComplete
 }) {
-    const timelineRef = useRef(null)
-
-    useEffect(() => {
-
-        if (timelineRef.current) {
-
-            timelineRef.current.scrollTop =
-                timelineRef.current.scrollHeight
-
-        }
-
-    }, [visibleAgents])
 
     if (!result) return null
 
@@ -48,79 +36,216 @@ export default function AgentTimeline({
         }
     ]
 
+    const executionAgents = [
+        {
+            title: "Execution Agent",
+            description:
+                "Executing approved recovery workflow against affected operational systems."
+        },
+        {
+            title: "Validation Agent",
+            description:
+                "Validating post-recovery system health and operational stability."
+        },
+        {
+            title: "Resolution Agent",
+            description:
+                "Finalizing incident lifecycle and updating operational state."
+        }
+    ]
+
     return (
 
-        <div
-            ref={timelineRef}
-            className="space-y-4"
-        >
+        <div className="space-y-10">
 
-            {agents.slice(0, visibleAgents).map((agent, index) => (
+            {/* ANALYSIS PHASE */}
 
-                <div
-                    key={index}
-                    className="
-                        bg-slate-950
-                        border
-                        border-slate-800
-                        rounded-2xl
-                        p-5
-                        animate-fadeIn
-                    "
-                >
+            <div>
 
-                    <div className="flex items-center justify-between">
+                <div className="mb-5">
 
-                        <div>
+                    <h2 className="text-2xl font-bold text-cyan-400">
+                        AI Analysis Phase
+                    </h2>
 
-                            <h3 className="text-cyan-400 font-bold text-lg">
-                                {agent.title}
-                            </h3>
+                    <p className="text-slate-400 mt-2">
+                        Multi-agent orchestration for incident diagnosis,
+                        recovery planning, risk analysis, and governance validation.
+                    </p>
 
-                            <p className="text-slate-300 mt-3">
-                                {agent.description}
-                            </p>
+                </div>
 
-                        </div>
+                <div className="space-y-4">
 
-                        <div className="flex items-center gap-3">
+                    {agents
+                        .slice(0, visibleAgents)
+                        .map((agent, index) => (
 
-                            <div className={`
-                                w-3
-                                h-3
-                                rounded-full
-                                animate-pulse
+                            <div
+                                key={index}
+                                className="
+                                    bg-slate-950
+                                    border
+                                    border-slate-800
+                                    rounded-2xl
+                                    p-5
+                                    animate-fadeIn
+                                "
+                            >
 
-                                ${index === runningAgentIndex
-                                    ? "bg-yellow-400"
-                                    : "bg-green-400"
-                                }
-                            `}></div>
+                                <div className="flex items-center justify-between">
 
-                            <div className={`
-                                text-sm
-                                font-semibold
+                                    <div>
 
-                                ${index === runningAgentIndex
-                                    ? "text-yellow-400"
-                                    : "text-green-400"
-                                }
-                            `}>
+                                        <h3 className="text-cyan-400 font-bold text-lg">
+                                            {agent.title}
+                                        </h3>
 
-                                {index === runningAgentIndex
-                                    ? "RUNNING"
-                                    : "COMPLETED"
-                                }
+                                        <p className="text-slate-300 mt-3">
+                                            {agent.description}
+                                        </p>
+
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+
+                                        <div className={`
+                                            w-3
+                                            h-3
+                                            rounded-full
+                                            animate-pulse
+
+                                            ${index === runningAgentIndex
+                                                ? "bg-yellow-400"
+                                                : "bg-green-400"
+                                            }
+                                        `}></div>
+
+                                        <div className={`
+                                            text-sm
+                                            font-semibold
+
+                                            ${index === runningAgentIndex
+                                                ? "text-yellow-400"
+                                                : "text-green-400"
+                                            }
+                                        `}>
+
+                                            {index === runningAgentIndex
+                                                ? "RUNNING"
+                                                : "COMPLETED"
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
 
                             </div>
 
-                        </div>
+                        ))}
+
+                </div>
+
+            </div>
+
+
+            {/* EXECUTION PHASE */}
+
+            {executionVisibleAgents > 0 && (
+
+                <div className="animate-fadeIn">
+
+                    <div className="mb-5">
+
+                        <h2 className="text-2xl font-bold text-green-400">
+                            Recovery Execution Phase
+                        </h2>
+
+                        <p className="text-slate-400 mt-2">
+                            Approved recovery workflow execution,
+                            operational validation, and resolution finalization.
+                        </p>
+
+                    </div>
+
+                    <div className="space-y-4">
+
+                        {executionAgents
+                            .slice(0, executionVisibleAgents)
+                            .map((agent, index) => (
+
+                                <div
+                                    key={index}
+                                    className="
+                                        bg-slate-950
+                                        border
+                                        border-green-500/20
+                                        rounded-2xl
+                                        p-5
+                                        animate-fadeIn
+                                    "
+                                >
+
+                                    <div className="flex items-center justify-between">
+
+                                        <div>
+
+                                            <h3 className="text-green-400 font-bold text-lg">
+                                                {agent.title}
+                                            </h3>
+
+                                            <p className="text-slate-300 mt-3">
+                                                {agent.description}
+                                            </p>
+
+                                        </div>
+
+                                        <div className="flex items-center gap-3">
+
+                                            <div className={`
+                                                w-3
+                                                h-3
+                                                rounded-full
+                                                animate-pulse
+
+                                                ${index === executionRunningIndex
+                                                    ? "bg-yellow-400"
+                                                    : "bg-green-400"
+                                                }
+                                            `}></div>
+
+                                            <div className={`
+                                                text-sm
+                                                font-semibold
+
+                                                ${index === executionRunningIndex
+                                                    ? "text-yellow-400"
+                                                    : "text-green-400"
+                                                }
+                                            `}>
+
+                                                {index === executionRunningIndex
+                                                    ? "RUNNING"
+                                                    : "COMPLETED"
+                                                }
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            ))}
 
                     </div>
 
                 </div>
 
-            ))}
+            )}
 
         </div>
 

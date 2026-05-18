@@ -29,6 +29,9 @@ export default function Dashboard() {
   const [runningAgentIndex, setRunningAgentIndex] = useState(-1)
   const orchestrationRef = useRef(null)
   const timelineScrollRef = useRef(null)
+  const [executionVisibleAgents, setExecutionVisibleAgents] = useState(0)
+  const [executionRunningIndex, setExecutionRunningIndex] = useState(-1)
+  const [executionComplete, setExecutionComplete] = useState(false)
 
 
   async function loadIncidents() {
@@ -119,12 +122,10 @@ export default function Dashboard() {
 
   async function handleApproveRecovery(incidentId) {
 
-    const result = await approveRecovery(incidentId)
+    setExecutionVisibleAgents(0)
+    setExecutionRunningIndex(-1)
+    setExecutionComplete(false)
 
-    setSelectedResult((prev) => ({
-      ...prev,
-      ...result
-    }))
     setTimeout(() => {
 
       orchestrationRef.current?.scrollIntoView({
@@ -134,7 +135,50 @@ export default function Dashboard() {
 
     }, 300)
 
-    await loadIncidents()
+    for (let i = 0; i < 3; i++) {
+
+      setTimeout(() => {
+
+        setExecutionVisibleAgents(i + 1)
+        setExecutionRunningIndex(i)
+
+        setTimeout(() => {
+
+          if (timelineScrollRef.current) {
+
+            timelineScrollRef.current.scrollTo({
+              top: timelineScrollRef.current.scrollHeight,
+              behavior: "smooth"
+            })
+
+          }
+
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: "smooth"
+          })
+
+        }, 150)
+
+      }, (i + 1) * 1400)
+
+    }
+
+    setTimeout(async () => {
+
+      setExecutionRunningIndex(-1)
+      setExecutionComplete(true)
+
+      const result = await approveRecovery(incidentId)
+
+      setSelectedResult((prev) => ({
+        ...prev,
+        ...result
+      }))
+
+      await loadIncidents()
+
+    }, 5500)
   }
 
   useEffect(() => {
@@ -326,6 +370,9 @@ export default function Dashboard() {
                   visibleAgents={visibleAgents}
                   animationComplete={animationComplete}
                   runningAgentIndex={runningAgentIndex}
+                  executionVisibleAgents={executionVisibleAgents}
+                  executionRunningIndex={executionRunningIndex}
+                  executionComplete={executionComplete}
                 />
 
               </div>
