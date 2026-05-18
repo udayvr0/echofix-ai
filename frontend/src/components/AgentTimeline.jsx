@@ -1,131 +1,128 @@
-const timelineSteps = [
-    {
-        key: "monitoring_result",
-        title: "Monitoring Agent"
-    },
-    {
-        key: "rootcause_result",
-        title: "Root Cause Agent"
-    },
-    {
-        key: "recovery_result",
-        title: "Recovery Planner"
-    },
-    {
-        key: "security_result",
-        title: "Security Validator"
-    },
-    {
-        key: "confidence_result",
-        title: "Confidence Engine"
-    },
-    {
-        key: "execution_result",
-        title: "Recovery Execution"
-    },
-    {
-        key: "validation_result",
-        title: "Validation"
-    }
-]
 
+import { useEffect, useRef } from "react"
 
-export default function AgentTimeline({ result }) {
+export default function AgentTimeline({
+    result,
+    visibleAgents,
+    animationComplete,
+    runningAgentIndex
+}) {
+    const timelineRef = useRef(null)
+
+    useEffect(() => {
+
+        if (timelineRef.current) {
+
+            timelineRef.current.scrollTop =
+                timelineRef.current.scrollHeight
+
+        }
+
+    }, [visibleAgents])
+
+    if (!result) return null
+
+    const agents = [
+        {
+            title: "Monitoring Agent",
+            description: result?.monitoring_result?.summary
+        },
+        {
+            title: "Root Cause Agent",
+            description: result?.rootcause_result?.summary
+        },
+        {
+            title: "Recovery Planner",
+            description: result?.recovery_result?.summary
+        },
+        {
+            title: "Security Validator",
+            description: result?.security_result?.summary
+        },
+        {
+            title: "Confidence Evaluator",
+            description:
+                result?.confidence_result?.approval_recommendation === "SAFE_TO_EXECUTE"
+                    ? "Approved for Autonomous Recovery"
+                    : "Requires Human Escalation"
+        }
+    ]
 
     return (
-        <div className="space-y-4">
 
-            {timelineSteps.map((step) => {
+        <div
+            ref={timelineRef}
+            className="space-y-4"
+        >
 
-                const data = result[step.key]
+            {agents.slice(0, visibleAgents).map((agent, index) => (
 
-                if (!data) return null
-
-                return (
-
-                    <div
-                        key={step.key}
-                        className="
+                <div
+                    key={index}
+                    className="
                         bg-slate-950
                         border
                         border-slate-800
                         rounded-2xl
                         p-5
-                        hover:border-cyan-500/40
-                        transition-all
-                        duration-300
-                        "
-                    >
+                        animate-fadeIn
+                    "
+                >
 
-                        <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between">
 
-                            <h3 className="text-lg font-semibold text-cyan-400">
-                                {step.title}
+                        <div>
+
+                            <h3 className="text-cyan-400 font-bold text-lg">
+                                {agent.title}
                             </h3>
 
-                            <div className="flex items-center gap-2">
+                            <p className="text-slate-300 mt-3">
+                                {agent.description}
+                            </p>
 
-                                <div className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></div>
+                        </div>
 
-                                <div className="text-green-400 text-sm font-medium">
-                                    COMPLETED
-                                </div>
+                        <div className="flex items-center gap-3">
+
+                            <div className={`
+                                w-3
+                                h-3
+                                rounded-full
+                                animate-pulse
+
+                                ${index === runningAgentIndex
+                                    ? "bg-yellow-400"
+                                    : "bg-green-400"
+                                }
+                            `}></div>
+
+                            <div className={`
+                                text-sm
+                                font-semibold
+
+                                ${index === runningAgentIndex
+                                    ? "text-yellow-400"
+                                    : "text-green-400"
+                                }
+                            `}>
+
+                                {index === runningAgentIndex
+                                    ? "RUNNING"
+                                    : "COMPLETED"
+                                }
 
                             </div>
 
                         </div>
 
-                        <div className="mt-3 text-slate-300 text-sm">
-
-                            {data.summary && (
-                                <p>{data.summary}</p>
-                            )}
-
-                            {data.approval_recommendation && (
-                                <p>
-                                    Recommendation:
-                                    {" "}
-                                    {data.approval_recommendation}
-                                </p>
-                            )}
-                            {data.confidence_score && (
-                                <p>
-                                    Confidence Score:
-                                    {" "}
-                                    {data.confidence_score}%
-                                </p>
-                            )}
-
-                            {data.operational_risk && (
-                                <p>
-                                    Operational Risk:
-                                    {" "}
-                                    {data.operational_risk}
-                                </p>
-                            )}
-
-                            {data.execution_status && (
-                                <p>
-                                    Execution Status:
-                                    {" "}
-                                    {data.execution_status}
-                                </p>
-                            )}
-
-                            {data.validationStatus && (
-                                <p>
-                                    Validation:
-                                    {" "}
-                                    {data.validationStatus}
-                                </p>
-                            )}
-
-                        </div>
-
                     </div>
-                )
-            })}
+
+                </div>
+
+            ))}
 
         </div>
+
     )
 }
