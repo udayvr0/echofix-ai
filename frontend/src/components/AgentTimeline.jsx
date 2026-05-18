@@ -54,9 +54,12 @@ export default function AgentTimeline({
         }
     ]
 
+    const isFailureFlow =
+        result?.final_status === "MANUAL_INTERVENTION_REQUIRED"
+
     return (
 
-        <div className="space-y-10">
+        <div className="space-y-6">
 
             {/* ANALYSIS PHASE */}
 
@@ -88,7 +91,7 @@ export default function AgentTimeline({
                                     border
                                     border-slate-800
                                     rounded-2xl
-                                    p-5
+                                    p-4
                                     animate-fadeIn
                                 "
                             >
@@ -117,7 +120,7 @@ export default function AgentTimeline({
 
                                             ${index === runningAgentIndex
                                                 ? "bg-yellow-400"
-                                                : "bg-green-400"
+                                                : "bg-emerald-400/20"
                                             }
                                         `}></div>
 
@@ -127,7 +130,7 @@ export default function AgentTimeline({
 
                                             ${index === runningAgentIndex
                                                 ? "text-yellow-400"
-                                                : "text-green-400"
+                                                : "text-emerald-300 border border-emerald-400/20"
                                             }
                                         `}>
 
@@ -149,6 +152,7 @@ export default function AgentTimeline({
                 </div>
 
             </div>
+            <div className="border-t border-white/10 pt-8"></div>
 
 
             {/* EXECUTION PHASE */}
@@ -159,8 +163,18 @@ export default function AgentTimeline({
 
                     <div className="mb-5">
 
-                        <h2 className="text-2xl font-bold text-green-400">
-                            Recovery Execution Phase
+                        <h2 className={`
+                                text-2xl
+                                font-bold
+                                ${isFailureFlow
+                                ? "text-red-400"
+                                : "text-green-400"
+                            }
+                            `}>
+                            {isFailureFlow
+                                ? "Recovery Failure Orchestration"
+                                : "Recovery Execution Phase"
+                            }
                         </h2>
 
                         <p className="text-slate-400 mt-2">
@@ -178,14 +192,17 @@ export default function AgentTimeline({
 
                                 <div
                                     key={index}
-                                    className="
+                                    className={`
                                         bg-slate-950
                                         border
-                                        border-green-500/20
+                                        ${isFailureFlow
+                                            ? "border-red-500/20"
+                                            : "border-green-500/20"
+                                        }
                                         rounded-2xl
-                                        p-5
+                                        p-4
                                         animate-fadeIn
-                                    "
+                                        `}
                                 >
 
                                     <div className="flex items-center justify-between">
@@ -212,23 +229,62 @@ export default function AgentTimeline({
 
                                                 ${index === executionRunningIndex
                                                     ? "bg-yellow-400"
-                                                    : "bg-green-400"
+
+                                                    : isFailureFlow && index === 0
+                                                        ? "bg-red-400"
+
+                                                        : isFailureFlow && index === 1
+                                                            ? "bg-orange-400"
+
+                                                            : isFailureFlow && index === 2
+                                                                ? "bg-purple-400"
+
+                                                                : "bg-green-400"
                                                 }
                                             `}></div>
 
                                             <div className={`
-                                                text-sm
-                                                font-semibold
+                                                    text-xs
+                                                    font-semibold
+                                                    px-3
+                                                    py-1
+                                                    rounded-full
+                                                    border
 
-                                                ${index === executionRunningIndex
-                                                    ? "text-yellow-400"
-                                                    : "text-green-400"
-                                                }
-                                            `}>
+                                                    ${index === executionRunningIndex
+
+                                                    ? "bg-amber-400/10 text-amber-300 border-amber-400/20"
+
+                                                    : isFailureFlow && index === 0
+
+                                                        ? "bg-rose-400/10 text-rose-300 border-rose-400/20"
+
+                                                        : isFailureFlow && index === 1
+
+                                                            ? "bg-orange-400/10 text-orange-300 border-orange-400/20"
+
+                                                            : isFailureFlow && index === 2
+
+                                                                ? "bg-purple-400/10 text-purple-300 border-purple-400/20"
+
+                                                                : "bg-emerald-400/10 text-emerald-300 border-emerald-400/20"
+                                                    }
+                                                `}>
 
                                                 {index === executionRunningIndex
+
                                                     ? "RUNNING"
-                                                    : "COMPLETED"
+
+                                                    : isFailureFlow && index === 0
+                                                        ? "FAILED"
+
+                                                        : isFailureFlow && index === 1
+                                                            ? "ROLLED BACK"
+
+                                                            : isFailureFlow && index === 2
+                                                                ? "ESCALATED"
+
+                                                                : "COMPLETED"
                                                 }
 
                                             </div>

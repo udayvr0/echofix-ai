@@ -29,6 +29,7 @@ export default function Dashboard() {
   const [runningAgentIndex, setRunningAgentIndex] = useState(-1)
   const orchestrationRef = useRef(null)
   const timelineScrollRef = useRef(null)
+  const incidentListRef = useRef(null)
   const [executionVisibleAgents, setExecutionVisibleAgents] = useState(0)
   const [executionRunningIndex, setExecutionRunningIndex] = useState(-1)
   const [executionComplete, setExecutionComplete] = useState(false)
@@ -36,9 +37,18 @@ export default function Dashboard() {
 
   async function loadIncidents() {
 
-    const data = await getIncidents()
+    try {
 
-    setIncidents(data)
+      const data = await getIncidents()
+
+      setIncidents(data)
+
+    } catch (error) {
+
+      console.error(error)
+
+    }
+
   }
 
 
@@ -47,6 +57,15 @@ export default function Dashboard() {
     await triggerIncident()
 
     await loadIncidents()
+
+    setTimeout(() => {
+
+      incidentListRef.current?.lastElementChild?.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      })
+
+    }, 300)
   }
 
 
@@ -55,6 +74,10 @@ export default function Dashboard() {
     setVisibleAgents(0)
     setRunningAgentIndex(-1)
     setAnimationComplete(false)
+
+    setExecutionVisibleAgents(0)
+    setExecutionRunningIndex(-1)
+    setExecutionComplete(false)
 
     const result = await orchestrateIncident(incidentId)
 
@@ -100,22 +123,23 @@ export default function Dashboard() {
       setRunningAgentIndex(-1)
       setAnimationComplete(true)
 
+      const confidence =
+        result?.confidence_result?.confidence_score || 0
+
+      const resolved =
+        result?.final_status === "RESOLVED" ? 1 : 0
+
+      const recoveries =
+        result?.execution_result?.success ? 1 : 0
+
+      setMetrics((prev) => ({
+        resolved: prev.resolved + resolved,
+        confidence,
+        recoveries: prev.recoveries + recoveries
+      }))
+
     }, 7800)
 
-    const confidence =
-      result?.confidence_result?.confidence_score || 0
-
-    const resolved =
-      result?.final_status === "RESOLVED" ? 1 : 0
-
-    const recoveries =
-      result?.execution_result?.success ? 1 : 0
-
-    setMetrics((prev) => ({
-      resolved: prev.resolved + resolved,
-      confidence,
-      recoveries: prev.recoveries + recoveries
-    }))
 
     await loadIncidents()
   }
@@ -271,7 +295,7 @@ export default function Dashboard() {
 
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div ref={incidentListRef} className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {incidents.map((incident) => (
               <IncidentCard
@@ -293,7 +317,10 @@ export default function Dashboard() {
             subtitle="Explainable AI reasoning, operational analysis, and recovery strategy generation."
           >
 
-            <AIDecisionPanel result={selectedResult} />
+            <AIDecisionPanel
+              result={selectedResult}
+              animationComplete={animationComplete}
+            />
 
           </SectionContainer>
 
@@ -362,7 +389,7 @@ export default function Dashboard() {
 
               <div
                 ref={timelineScrollRef}
-                className="max-h-[700px] overflow-y-auto pr-2"
+                className="max-h-[700px] overflow-y-scroll pr-2"
               >
 
                 <AgentTimeline
