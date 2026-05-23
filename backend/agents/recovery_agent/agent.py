@@ -66,7 +66,7 @@ def run_recovery_agent(state):
     )
 
     summary = (
-        f"Generated autonomous recovery strategy for "
+        f"Generated AI-assisted recovery strategy. "
         f"{incident_type.replace('_', ' ')}."
     )
 
