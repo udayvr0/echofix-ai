@@ -19,6 +19,7 @@ export default function Dashboard() {
 
   const [incidents, setIncidents] = useState([])
   const [selectedResult, setSelectedResult] = useState(null)
+  const [executionPlaybook, setExecutionPlaybook] = useState(null)
   const [animationComplete, setAnimationComplete] = useState(false)
   const [metrics, setMetrics] = useState({
     resolved: 0,
@@ -82,6 +83,13 @@ export default function Dashboard() {
     const result = await orchestrateIncident(incidentId)
 
     setSelectedResult(result)
+    setExecutionPlaybook(
+      result.execution_playbook || null
+    )
+    console.log(
+      "PLAYBOOK",
+      result.execution_playbook
+    )
 
     setTimeout(() => {
 
@@ -400,6 +408,7 @@ export default function Dashboard() {
                   executionVisibleAgents={executionVisibleAgents}
                   executionRunningIndex={executionRunningIndex}
                   executionComplete={executionComplete}
+                  executionPlaybook={executionPlaybook}
                 />
 
               </div>

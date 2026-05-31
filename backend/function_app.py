@@ -11,6 +11,7 @@ from services.incident_store import get_incident_by_id
 from services.incident_store import update_incident_status
 from services.execution_service import execute_recovery_plan
 from services.validation_service import validate_recovery
+from orchestration.execution_playbooks import EXECUTION_PLAYBOOKS
 
 app = func.FunctionApp()
 
@@ -98,6 +99,19 @@ def orchestrate_incident_api(req: func.HttpRequest) -> func.HttpResponse:
     }
 
     result = graph.invoke(initial_state)
+    playbook = EXECUTION_PLAYBOOKS.get(
+        incident.incident_type,
+        {
+            "execution": [
+                "Executing recovery workflow"
+            ],
+            "validation": [
+                "Validating platform health"
+            ]
+        }
+    )
+    result["execution_playbook"] = playbook
+    
     update_incident_status(incident.incident_id, result["final_status"])
 
     return func.HttpResponse(

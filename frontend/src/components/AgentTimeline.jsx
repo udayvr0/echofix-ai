@@ -5,7 +5,8 @@ export default function AgentTimeline({
     runningAgentIndex,
     executionVisibleAgents,
     executionRunningIndex,
-    executionComplete
+    executionComplete,
+    executionPlaybook
 }) {
 
     if (!result) return null
@@ -40,17 +41,24 @@ export default function AgentTimeline({
         {
             title: "Execution Agent",
             description:
-                "Executing approved recovery workflow against affected operational systems."
+                "Executing approved recovery workflow against affected operational systems.",
+            steps: executionPlaybook?.execution || []
         },
         {
             title: "Validation Agent",
             description:
-                "Validating post-recovery system health and operational stability."
+                "Validating post-recovery system health and operational stability.",
+            steps: executionPlaybook?.validation || []
         },
         {
             title: "Resolution Agent",
             description:
-                "Finalizing incident lifecycle and updating operational state."
+                "Finalizing incident lifecycle and updating operational state.",
+            steps: [
+                "Updating incident status",
+                "Recording recovery outcome",
+                "Closing incident lifecycle"
+            ]
         }
     ]
 
@@ -107,6 +115,32 @@ export default function AgentTimeline({
                                         <p className="text-slate-300 mt-3">
                                             {agent.description}
                                         </p>
+
+                                        {agent.steps?.length > 0 && (
+
+                                            <div className="mt-4 space-y-2">
+
+                                                {agent.steps.map((step, stepIndex) => (
+
+                                                    <div
+                                                        key={stepIndex}
+                                                        className="flex items-center gap-2 text-slate-400 text-sm"
+                                                    >
+                                                        <span className="text-emerald-400">
+                                                            ✓
+                                                        </span>
+
+                                                        <span>
+                                                            {step}
+                                                        </span>
+
+                                                    </div>
+
+                                                ))}
+
+                                            </div>
+
+                                        )}
 
                                     </div>
 
@@ -216,6 +250,9 @@ export default function AgentTimeline({
                                             <p className="text-slate-300 mt-3">
                                                 {agent.description}
                                             </p>
+                                            <pre className="text-red-400 text-xs">
+                                                {JSON.stringify(agent.steps, null, 2)}
+                                            </pre>
 
                                         </div>
 
@@ -268,7 +305,7 @@ export default function AgentTimeline({
                                                                 ? "bg-purple-400/10 text-purple-300 border-purple-400/20"
 
                                                                 : "bg-emerald-400/10 text-emerald-300 border-emerald-400/20"
-                                                    }
+                                                }
                                                 `}>
 
                                                 {index === executionRunningIndex
