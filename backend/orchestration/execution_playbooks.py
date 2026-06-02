@@ -63,5 +63,44 @@ EXECUTION_PLAYBOOKS = {
             "Runtime stable",
             "Monitoring restored"
         ]
+    },
+
+    "HIGH_MEMORY_USAGE": {
+        "execution": [
+            "Scaling container memory allocation",
+            "Restarting memory-intensive workloads",
+            "Optimizing runtime resource consumption"
+        ],
+        "validation": [
+            "Memory utilization normalized",
+            "Container stability restored",
+            "Resource monitoring healthy"
+        ]
+    },
+
+    "API_AUTH_FAILURE": {
+        "execution": [
+            "Refreshing API credentials",
+            "Re-establishing authentication session",
+            "Validating authorization flow"
+        ],
+        "validation": [
+            "Authentication successful",
+            "API access restored",
+            "Security validation passed"
+        ]
+    },
+
+    "DEPLOYMENT_FAILURE": {
+        "execution": [
+            "Rolling back failed deployment",
+            "Restoring previous stable release",
+            "Reinitializing application services"
+        ],
+        "validation": [
+            "Application availability restored",
+            "Deployment health checks passed",
+            "Production environment stable"
+        ]
     }
 }

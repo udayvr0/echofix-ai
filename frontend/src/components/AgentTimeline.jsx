@@ -6,7 +6,10 @@ export default function AgentTimeline({
     executionVisibleAgents,
     executionRunningIndex,
     executionComplete,
-    executionPlaybook
+    executionPlaybook,
+    visibleExecutionSteps,
+    visibleValidationSteps,
+    visibleResolutionSteps
 }) {
 
     if (!result) return null
@@ -250,9 +253,41 @@ export default function AgentTimeline({
                                             <p className="text-slate-300 mt-3">
                                                 {agent.description}
                                             </p>
-                                            <pre className="text-red-400 text-xs">
-                                                {JSON.stringify(agent.steps, null, 2)}
-                                            </pre>
+                                            {agent.steps?.length > 0 && (
+
+                                                <div className="mt-4 space-y-2">
+
+                                                    {
+                                                        (
+                                                            index === 0
+                                                                ? agent.steps.slice(0, visibleExecutionSteps)
+
+                                                                : index === 1
+                                                                    ? agent.steps.slice(0, visibleValidationSteps)
+
+                                                                    : agent.steps.slice(0, visibleResolutionSteps)
+
+                                                        ).map((step, stepIndex) => (
+
+                                                            <div
+                                                                key={stepIndex}
+                                                                className="flex items-center gap-2 text-slate-300 text-sm"
+                                                            >
+                                                                <span className="text-green-400">
+                                                                    ✓
+                                                                </span>
+
+                                                                <span>
+                                                                    {step}
+                                                                </span>
+
+                                                            </div>
+
+                                                        ))}
+
+                                                </div>
+
+                                            )}
 
                                         </div>
 
