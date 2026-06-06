@@ -5,7 +5,12 @@ export default function AgentTimeline({
     runningAgentIndex,
     executionVisibleAgents,
     executionRunningIndex,
-    executionComplete
+    executionComplete,
+    executionPlaybook,
+    visibleExecutionSteps,
+    visibleValidationSteps,
+    visibleResolutionSteps,
+    evidenceResult
 }) {
 
     if (!result) return null
@@ -40,17 +45,24 @@ export default function AgentTimeline({
         {
             title: "Execution Agent",
             description:
-                "Executing approved recovery workflow against affected operational systems."
+                "Executing approved recovery workflow against affected operational systems.",
+            steps: executionPlaybook?.execution || []
         },
         {
             title: "Validation Agent",
             description:
-                "Validating post-recovery system health and operational stability."
+                "Validating post-recovery system health and operational stability.",
+            steps: executionPlaybook?.validation || []
         },
         {
             title: "Resolution Agent",
             description:
-                "Finalizing incident lifecycle and updating operational state."
+                "Finalizing incident lifecycle and updating operational state.",
+            steps: [
+                "Updating incident status",
+                "Recording recovery outcome",
+                "Closing incident lifecycle"
+            ]
         }
     ]
 
@@ -107,6 +119,32 @@ export default function AgentTimeline({
                                         <p className="text-slate-300 mt-3">
                                             {agent.description}
                                         </p>
+
+                                        {agent.steps?.length > 0 && (
+
+                                            <div className="mt-4 space-y-2">
+
+                                                {agent.steps.map((step, stepIndex) => (
+
+                                                    <div
+                                                        key={stepIndex}
+                                                        className="flex items-center gap-2 text-slate-400 text-sm"
+                                                    >
+                                                        <span className="text-emerald-400">
+                                                            ✓
+                                                        </span>
+
+                                                        <span>
+                                                            {step}
+                                                        </span>
+
+                                                    </div>
+
+                                                ))}
+
+                                            </div>
+
+                                        )}
 
                                     </div>
 
@@ -216,6 +254,41 @@ export default function AgentTimeline({
                                             <p className="text-slate-300 mt-3">
                                                 {agent.description}
                                             </p>
+                                            {agent.steps?.length > 0 && (
+
+                                                <div className="mt-4 space-y-2">
+
+                                                    {
+                                                        (
+                                                            index === 0
+                                                                ? agent.steps.slice(0, visibleExecutionSteps)
+
+                                                                : index === 1
+                                                                    ? agent.steps.slice(0, visibleValidationSteps)
+
+                                                                    : agent.steps.slice(0, visibleResolutionSteps)
+
+                                                        ).map((step, stepIndex) => (
+
+                                                            <div
+                                                                key={stepIndex}
+                                                                className="flex items-center gap-2 text-slate-300 text-sm"
+                                                            >
+                                                                <span className="text-green-400">
+                                                                    ✓
+                                                                </span>
+
+                                                                <span>
+                                                                    {step}
+                                                                </span>
+
+                                                            </div>
+
+                                                        ))}
+
+                                                </div>
+
+                                            )}
 
                                         </div>
 
@@ -268,7 +341,7 @@ export default function AgentTimeline({
                                                                 ? "bg-purple-400/10 text-purple-300 border-purple-400/20"
 
                                                                 : "bg-emerald-400/10 text-emerald-300 border-emerald-400/20"
-                                                    }
+                                                }
                                                 `}>
 
                                                 {index === executionRunningIndex
@@ -296,6 +369,56 @@ export default function AgentTimeline({
                                 </div>
 
                             ))}
+                        {
+                            evidenceResult && (
+
+                                <div
+                                    className="
+                                        bg-slate-950
+                                        border
+                                        border-cyan-500/20
+                                        rounded-2xl
+                                        p-4
+                                        animate-fadeIn
+                                    "
+                                >
+
+                                    <h3 className="text-cyan-400 font-bold text-lg">
+                                        Recovery Evidence
+                                    </h3>
+
+                                    <p className="text-slate-300 mt-3">
+                                        Azure remediation verification completed.
+                                    </p>
+
+                                    <div className="mt-4 space-y-3">
+
+                                        <div className="text-slate-300">
+                                            <span className="text-slate-500">
+                                                Function App:
+                                            </span>{" "}
+                                            ef-remed-fn
+                                        </div>
+
+                                        <div className="text-slate-300">
+                                            <span className="text-slate-500">
+                                                Worker Count:
+                                            </span>{" "}
+                                            {evidenceResult.beforeWorkerCount}
+                                            {" → "}
+                                            {evidenceResult.afterWorkerCount}
+                                        </div>
+
+                                        <div className="text-emerald-400">
+                                            ✓ {evidenceResult.verification}
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            )
+                        }
 
                     </div>
 

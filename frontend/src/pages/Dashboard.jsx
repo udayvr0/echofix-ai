@@ -19,6 +19,7 @@ export default function Dashboard() {
 
   const [incidents, setIncidents] = useState([])
   const [selectedResult, setSelectedResult] = useState(null)
+  const [executionPlaybook, setExecutionPlaybook] = useState(null)
   const [animationComplete, setAnimationComplete] = useState(false)
   const [metrics, setMetrics] = useState({
     resolved: 0,
@@ -33,6 +34,12 @@ export default function Dashboard() {
   const [executionVisibleAgents, setExecutionVisibleAgents] = useState(0)
   const [executionRunningIndex, setExecutionRunningIndex] = useState(-1)
   const [executionComplete, setExecutionComplete] = useState(false)
+
+  const [lifecycleStatus, setLifecycleStatus] = useState("")
+
+  const [visibleExecutionSteps, setVisibleExecutionSteps] = useState(0)
+  const [visibleValidationSteps, setVisibleValidationSteps] = useState(0)
+  const [visibleResolutionSteps, setVisibleResolutionSteps] = useState(0)
 
 
   async function loadIncidents() {
@@ -78,10 +85,26 @@ export default function Dashboard() {
     setExecutionVisibleAgents(0)
     setExecutionRunningIndex(-1)
     setExecutionComplete(false)
+    setLifecycleStatus(
+      ""
+    )
 
     const result = await orchestrateIncident(incidentId)
 
     setSelectedResult(result)
+    setLifecycleStatus(
+      result.final_status
+    )
+    setExecutionPlaybook(
+      result.execution_playbook || null
+    )
+    setVisibleExecutionSteps(0)
+    setVisibleValidationSteps(0)
+    setVisibleResolutionSteps(0)
+    console.log(
+      "PLAYBOOK",
+      result.execution_playbook
+    )
 
     setTimeout(() => {
 
@@ -146,9 +169,15 @@ export default function Dashboard() {
 
   async function handleApproveRecovery(incidentId) {
 
-    setExecutionVisibleAgents(0)
-    setExecutionRunningIndex(-1)
+    setExecutionVisibleAgents(1)
+    setExecutionRunningIndex(0)
     setExecutionComplete(false)
+
+    setVisibleExecutionSteps(0)
+    setVisibleValidationSteps(0)
+    setVisibleResolutionSteps(0)
+
+    setLifecycleStatus("EXECUTING_RECOVERY")
 
     setTimeout(() => {
 
@@ -159,41 +188,79 @@ export default function Dashboard() {
 
     }, 300)
 
-    for (let i = 0; i < 3; i++) {
+    const executionCount =
+      executionPlaybook?.execution?.length || 0
+
+    const validationCount =
+      executionPlaybook?.validation?.length || 0
+
+    // EXECUTION STEPS
+
+    for (let i = 1; i <= executionCount; i++) {
 
       setTimeout(() => {
 
-        setExecutionVisibleAgents(i + 1)
-        setExecutionRunningIndex(i)
+        setVisibleExecutionSteps(i)
 
-        setTimeout(() => {
-
-          if (timelineScrollRef.current) {
-
-            timelineScrollRef.current.scrollTo({
-              top: timelineScrollRef.current.scrollHeight,
-              behavior: "smooth"
-            })
-
-          }
-
-          window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: "smooth"
-          })
-
-        }, 150)
-
-      }, (i + 1) * 1400)
+      }, i * 1300)
 
     }
+
+    // SHOW VALIDATION AGENT
+
+    setTimeout(() => {
+
+      setExecutionVisibleAgents(2)
+      setExecutionRunningIndex(1)
+
+      setLifecycleStatus(
+        "VALIDATING_RECOVERY"
+      )
+
+    }, executionCount * 1300)
+
+    // VALIDATION STEPS
+
+    for (let i = 1; i <= validationCount; i++) {
+
+      setTimeout(() => {
+
+        setVisibleValidationSteps(i)
+
+      }, (executionCount * 1300) + (i * 1300))
+
+    }
+
+    // SHOW RESOLUTION AGENT
+
+    setTimeout(() => {
+
+      setExecutionVisibleAgents(3)
+      setExecutionRunningIndex(2)
+
+    }, (executionCount + validationCount) * 1300)
+
+    // RESOLUTION STEPS
+
+    setTimeout(() => {
+
+      setVisibleResolutionSteps(3)
+
+    }, (executionCount + validationCount + 1) * 1300)
+
+    // COMPLETE
 
     setTimeout(async () => {
 
       setExecutionRunningIndex(-1)
       setExecutionComplete(true)
 
-      const result = await approveRecovery(incidentId)
+      setLifecycleStatus("RESOLVED")
+
+      const result =
+        await approveRecovery(incidentId)
+      console.log("APPROVE RESULT")
+      console.log(result)
 
       setSelectedResult((prev) => ({
         ...prev,
@@ -202,8 +269,35 @@ export default function Dashboard() {
 
       await loadIncidents()
 
-    }, 5500)
+    }, (executionCount + validationCount + 3) * 1300)
+
   }
+
+  useEffect(() => {
+
+    setTimeout(() => {
+
+      if (timelineScrollRef.current) {
+
+        timelineScrollRef.current.scrollTo({
+          top: timelineScrollRef.current.scrollHeight,
+          behavior: "smooth"
+        })
+
+      }
+
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth"
+      })
+
+    }, 100)
+
+  }, [
+    visibleExecutionSteps,
+    visibleValidationSteps,
+    visibleResolutionSteps
+  ])
 
   useEffect(() => {
     loadIncidents()
@@ -379,7 +473,7 @@ export default function Dashboard() {
                       font-bold
                       "
                     >
-                      {selectedResult.final_status}
+                      {lifecycleStatus}
                     </div>
 
                   </div>
@@ -400,6 +494,11 @@ export default function Dashboard() {
                   executionVisibleAgents={executionVisibleAgents}
                   executionRunningIndex={executionRunningIndex}
                   executionComplete={executionComplete}
+                  executionPlaybook={executionPlaybook}
+                  visibleExecutionSteps={visibleExecutionSteps}
+                  visibleValidationSteps={visibleValidationSteps}
+                  visibleResolutionSteps={visibleResolutionSteps}
+                  evidenceResult={selectedResult?.evidence_result}
                 />
 
               </div>

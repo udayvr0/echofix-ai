@@ -43,20 +43,37 @@ def run_rootcause_agent(state):
     system_prompt = """
                     You are an enterprise AI operations engineer specializing in production incident analysis.
                     """
-
+    
     user_prompt = f"""
-                    Analyze this operational incident:
+                    Analyze this enterprise operational incident.
 
                     Incident Type:
-                    {incident_type}
+                    {state["incident_type"]}
 
                     Description:
                     {incident_description}
 
-                    Determine:
-                    - probable root cause
-                    - operational impact
-                    - recommended remediation
+                    Respond STRICTLY in this format:
+
+                    ROOT CAUSE:
+                    <1 concise operational explanation, maximum 2 sentences>
+
+                    OPERATIONAL IMPACT:
+                    - bullet 1
+                    - bullet 2
+                    - bullet 3
+
+                    RECOMMENDED REMEDIATION:
+                    - bullet 1
+                    - bullet 2
+                    - bullet 3
+
+                    IMPORTANT:
+                    - Keep total response under 120 words
+                    - Be concise and operational
+                    - No long paragraphs
+                    - No markdown formatting
+                    - Focus on enterprise incident response language
                     """
 
     ai_response = generate_completion(

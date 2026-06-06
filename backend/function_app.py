@@ -4,6 +4,7 @@ import json
 import logging
 import uuid
 
+from backend.services.evidence_service import get_worker_count
 from simulators.api_failure_simulator.simulator import trigger_api_failure
 from services.incident_store import get_all_incidents
 from orchestration.langgraph_flow import graph
@@ -11,6 +12,8 @@ from services.incident_store import get_incident_by_id
 from services.incident_store import update_incident_status
 from services.execution_service import execute_recovery_plan
 from services.validation_service import validate_recovery
+from orchestration.execution_playbooks import EXECUTION_PLAYBOOKS
+from agents.evidence_agent.agent import run_evidence_agent
 
 app = func.FunctionApp()
 
@@ -98,6 +101,19 @@ def orchestrate_incident_api(req: func.HttpRequest) -> func.HttpResponse:
     }
 
     result = graph.invoke(initial_state)
+    playbook = EXECUTION_PLAYBOOKS.get(
+        incident.incident_type,
+        {
+            "execution": [
+                "Executing recovery workflow"
+            ],
+            "validation": [
+                "Validating platform health"
+            ]
+        }
+    )
+    result["execution_playbook"] = playbook
+    
     update_incident_status(incident.incident_id, result["final_status"])
 
     return func.HttpResponse(
@@ -118,12 +134,20 @@ def approve_recovery_api(req: func.HttpRequest) -> func.HttpResponse:
             "Incident not found.",
             status_code=404
         )
+    
+    before_worker_count = get_worker_count()
 
     execution_result = execute_recovery_plan({
-        "incident_type": incident.incident_type
+        "incident_type": incident.incident_type,
+        "severity": incident.severity
     })
 
+    after_worker_count = get_worker_count()
+
     validation_result = validate_recovery({})
+    evidence_result = run_evidence_agent({
+    "previous_worker_count": str(before_worker_count)
+    })
 
     update_incident_status(
         incident.incident_id,
@@ -133,6 +157,7 @@ def approve_recovery_api(req: func.HttpRequest) -> func.HttpResponse:
     response = {
         "execution_result": execution_result.__dict__,
         "validation_result": validation_result,
+        "evidence_result": evidence_result,
         "final_status": "RESOLVED"
     }
 
