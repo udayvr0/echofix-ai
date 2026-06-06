@@ -9,7 +9,8 @@ export default function AgentTimeline({
     executionPlaybook,
     visibleExecutionSteps,
     visibleValidationSteps,
-    visibleResolutionSteps
+    visibleResolutionSteps,
+    evidenceResult
 }) {
 
     if (!result) return null
@@ -368,6 +369,56 @@ export default function AgentTimeline({
                                 </div>
 
                             ))}
+                        {
+                            evidenceResult && (
+
+                                <div
+                                    className="
+                                        bg-slate-950
+                                        border
+                                        border-cyan-500/20
+                                        rounded-2xl
+                                        p-4
+                                        animate-fadeIn
+                                    "
+                                >
+
+                                    <h3 className="text-cyan-400 font-bold text-lg">
+                                        Recovery Evidence
+                                    </h3>
+
+                                    <p className="text-slate-300 mt-3">
+                                        Azure remediation verification completed.
+                                    </p>
+
+                                    <div className="mt-4 space-y-3">
+
+                                        <div className="text-slate-300">
+                                            <span className="text-slate-500">
+                                                Function App:
+                                            </span>{" "}
+                                            ef-remed-fn
+                                        </div>
+
+                                        <div className="text-slate-300">
+                                            <span className="text-slate-500">
+                                                Worker Count:
+                                            </span>{" "}
+                                            {evidenceResult.beforeWorkerCount}
+                                            {" → "}
+                                            {evidenceResult.afterWorkerCount}
+                                        </div>
+
+                                        <div className="text-emerald-400">
+                                            ✓ {evidenceResult.verification}
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            )
+                        }
 
                     </div>
 

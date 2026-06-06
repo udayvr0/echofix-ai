@@ -259,6 +259,8 @@ export default function Dashboard() {
 
       const result =
         await approveRecovery(incidentId)
+      console.log("APPROVE RESULT")
+      console.log(result)
 
       setSelectedResult((prev) => ({
         ...prev,
@@ -496,6 +498,7 @@ export default function Dashboard() {
                   visibleExecutionSteps={visibleExecutionSteps}
                   visibleValidationSteps={visibleValidationSteps}
                   visibleResolutionSteps={visibleResolutionSteps}
+                  evidenceResult={selectedResult?.evidence_result}
                 />
 
               </div>
