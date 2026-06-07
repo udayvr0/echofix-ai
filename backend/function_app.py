@@ -4,7 +4,7 @@ import json
 import logging
 import uuid
 
-from backend.services.evidence_service import get_worker_count
+from services.evidence_service import get_worker_count
 from simulators.api_failure_simulator.simulator import trigger_api_failure
 from services.incident_store import get_all_incidents
 from orchestration.langgraph_flow import graph
@@ -96,7 +96,7 @@ def orchestrate_incident_api(req: func.HttpRequest) -> func.HttpResponse:
         "recovery_result": {},
         "security_result": {},
 
-        "approval_status": "APPROVED",
+        "approval_status": "PENDING",
         "final_status": "PROCESSING"
     }
 
