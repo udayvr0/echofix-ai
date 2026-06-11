@@ -40,6 +40,7 @@ export default function Dashboard() {
   const [visibleExecutionSteps, setVisibleExecutionSteps] = useState(0)
   const [visibleValidationSteps, setVisibleValidationSteps] = useState(0)
   const [visibleResolutionSteps, setVisibleResolutionSteps] = useState(0)
+  const [incidentTimeline, setIncidentTimeline] = useState([])
 
 
   async function loadIncidents() {
@@ -92,6 +93,14 @@ export default function Dashboard() {
     const result = await orchestrateIncident(incidentId)
 
     setSelectedResult(result)
+    const now = new Date()
+
+    setIncidentTimeline([
+      {
+        time: new Date().toLocaleTimeString(),
+        event: "Incident Generated"
+      }
+    ])
     setLifecycleStatus(
       result.final_status
     )
@@ -121,6 +130,21 @@ export default function Dashboard() {
 
         setVisibleAgents(i + 1)
         setRunningAgentIndex(i)
+        const events = [
+          "Monitoring Analysis Completed",
+          "Root Cause Identified",
+          "Recovery Plan Generated",
+          "Security Validation Passed",
+          "Approval Requested"
+        ]
+
+        setIncidentTimeline(prev => [
+          ...prev,
+          {
+            time: new Date().toLocaleTimeString(),
+            event: events[i]
+          }
+        ])
         setTimeout(() => {
 
           if (timelineScrollRef.current) {
@@ -179,6 +203,14 @@ export default function Dashboard() {
 
     setLifecycleStatus("EXECUTING_RECOVERY")
 
+    setIncidentTimeline(prev => [
+      ...prev,
+      {
+        time: new Date().toLocaleTimeString(),
+        event: "Approval Granted"
+      }
+    ])
+
     setTimeout(() => {
 
       orchestrationRef.current?.scrollIntoView({
@@ -213,6 +245,14 @@ export default function Dashboard() {
       setExecutionVisibleAgents(2)
       setExecutionRunningIndex(1)
 
+      setIncidentTimeline(prev => [
+        ...prev,
+        {
+          time: new Date().toLocaleTimeString(),
+          event: "Recovery Validation Started"
+        }
+      ])
+
       setLifecycleStatus(
         "VALIDATING_RECOVERY"
       )
@@ -238,6 +278,14 @@ export default function Dashboard() {
       setExecutionVisibleAgents(3)
       setExecutionRunningIndex(2)
 
+      setIncidentTimeline(prev => [
+        ...prev,
+        {
+          time: new Date().toLocaleTimeString(),
+          event: "Resolution Finalization Started"
+        }
+      ])
+
     }, (executionCount + validationCount) * 1300)
 
     // RESOLUTION STEPS
@@ -256,6 +304,22 @@ export default function Dashboard() {
       setExecutionComplete(true)
 
       setLifecycleStatus("RESOLVED")
+
+      setIncidentTimeline(prev => [
+        ...prev,
+        {
+          time: new Date().toLocaleTimeString(),
+          event: "Azure Remediation Executed"
+        },
+        {
+          time: new Date().toLocaleTimeString(),
+          event: "Evidence Verification Completed"
+        },
+        {
+          time: new Date().toLocaleTimeString(),
+          event: "Incident Resolved"
+        }
+      ])
 
       const result =
         await approveRecovery(incidentId)
@@ -485,6 +549,51 @@ export default function Dashboard() {
                 ref={timelineScrollRef}
                 className="max-h-[700px] overflow-y-scroll pr-2"
               >
+
+                <div className="
+                  bg-slate-950
+                  border
+                  border-slate-800
+                  rounded-2xl
+                  p-6
+                  mb-6
+                  ">
+                  <h3 className="text-xl font-bold text-cyan-400 mb-4">
+                    Incident Timeline
+                  </h3>
+
+                  <div className="space-y-3">
+
+                    {incidentTimeline.map((item, index) => (
+
+                      <div
+                        key={index}
+                        className="
+                        flex
+                        items-center
+                        gap-4
+                        text-sm
+                        "
+                      >
+                        <div className="text-cyan-400 font-mono">
+                          {item.time}
+                        </div>
+
+                        <div className="text-green-400">
+                          ✓
+                        </div>
+
+                        <div className="text-slate-300">
+                          {item.event}
+                        </div>
+
+                      </div>
+
+                    ))}
+
+                  </div>
+
+                </div>
 
                 <AgentTimeline
                   result={selectedResult}
