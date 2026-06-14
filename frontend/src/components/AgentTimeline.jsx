@@ -10,7 +10,8 @@ export default function AgentTimeline({
     visibleExecutionSteps,
     visibleValidationSteps,
     visibleResolutionSteps,
-    evidenceResult
+    evidenceResult,
+    lessonsResult
 }) {
 
     if (!result) return null
@@ -393,26 +394,111 @@ export default function AgentTimeline({
 
                                     <div className="mt-4 space-y-3">
 
-                                        <div className="text-slate-300">
-                                            <span className="text-slate-500">
-                                                Function App:
-                                            </span>{" "}
-                                            ef-remed-fn
-                                        </div>
+                                        {
+                                            evidenceResult.verificationType === "SCALING" && (
 
-                                        <div className="text-slate-300">
-                                            <span className="text-slate-500">
-                                                Worker Count:
-                                            </span>{" "}
-                                            {evidenceResult.beforeWorkerCount}
-                                            {" → "}
-                                            {evidenceResult.afterWorkerCount}
-                                        </div>
+                                                <div className="text-slate-300">
+
+                                                    <span className="text-slate-500">
+                                                        Function App:
+                                                    </span>{" "}
+
+                                                    ef-remed-fn
+
+                                                </div>
+
+                                            )
+                                        }
+
+                                        {
+                                            evidenceResult.verificationType === "SCALING" && (
+
+                                                <div className="text-slate-300">
+
+                                                    <span className="text-slate-500">
+                                                        Worker Count:
+                                                    </span>{" "}
+
+                                                    {evidenceResult.beforeWorkerCount}
+
+                                                    {" → "}
+
+                                                    {evidenceResult.afterWorkerCount}
+
+                                                </div>
+
+                                            )
+                                        }
+
+                                        {
+                                            evidenceResult.verificationType === "GENERIC" && (
+
+                                                <div className="text-slate-300">
+
+                                                    <span className="text-slate-500">
+                                                        Incident Type:
+                                                    </span>{" "}
+
+                                                    {evidenceResult.incidentType}
+
+                                                </div>
+
+                                            )
+                                        }
+
+                                        {
+                                            evidenceResult.verificationType === "TOKEN" && (
+
+                                                <div className="text-slate-300">
+
+                                                    <span className="text-slate-500">
+                                                        Token Status:
+                                                    </span>{" "}
+
+                                                    {evidenceResult.tokenStatus}
+
+                                                </div>
+
+                                            )
+                                        }
 
                                         <div className="text-emerald-400">
                                             ✓ {evidenceResult.verification}
                                         </div>
 
+                                    </div>
+
+                                </div>
+
+                            )
+                        }
+                        {
+                            lessonsResult && (
+
+                                <div
+                                    className="
+                                        bg-slate-950
+                                        border
+                                        border-purple-500/20
+                                        rounded-2xl
+                                        p-4
+                                        animate-fadeIn
+                                        mt-4
+                                    "
+                                >
+
+                                    <h3 className="text-purple-400 font-bold text-lg">
+                                        Lessons Learned
+                                    </h3>
+
+                                    <div
+                                        className="
+                                            text-slate-300
+                                            mt-3
+                                            whitespace-pre-wrap
+                                        "
+                                    >
+                                        {lessonsResult.summary}
                                     </div>
 
                                 </div>

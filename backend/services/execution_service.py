@@ -1,5 +1,9 @@
 from models.execution_result import ExecutionResult
-from services.azure_remediation_service import update_worker_count
+from services.azure_remediation_service import (
+    update_worker_count,
+    update_app_setting
+)
+
 
 
 def determine_worker_count(severity):
@@ -50,6 +54,19 @@ def execute_recovery_plan(state):
             success=True,
             execution_status="EXECUTED",
             action_taken=f"Azure worker count adjusted to {worker_count} based on incident severity.",
+            validation_required=True
+        )
+    elif incident_type == "TOKEN_EXPIRATION":
+        update_app_setting(
+            "TOKEN_STATUS",
+            "REFRESHED"
+        )
+
+        return ExecutionResult(
+            success=True,
+            execution_status="EXECUTED",
+            action_taken=
+            "Authentication token refreshed successfully.",
             validation_required=True
         )
 

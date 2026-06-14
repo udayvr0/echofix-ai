@@ -14,6 +14,122 @@ import {
   approveRecovery
 } from "../services/api"
 
+function EvidenceCard({ evidence }) {
+
+  if (!evidence) return null
+
+  return (
+
+    <div
+      className="
+      bg-slate-950
+      border
+      border-emerald-500/30
+      rounded-2xl
+      p-6
+      mb-6
+      "
+    >
+
+      <div className="flex items-center gap-2 mb-6">
+
+        <span className="text-2xl">
+          📊
+        </span>
+
+        <h3
+          className="
+          text-xl
+          font-bold
+          text-emerald-400
+          "
+        >
+          Recovery Evidence
+        </h3>
+
+      </div>
+
+      <div
+        className="
+        grid
+        md:grid-cols-2
+        gap-6
+        "
+      >
+
+        <div
+          className="
+          bg-slate-900
+          border
+          border-slate-700
+          rounded-xl
+          p-5
+          "
+        >
+
+          <div className="text-slate-400 text-sm mb-2">
+            Previous State
+          </div>
+
+          <div className="text-3xl font-bold text-red-400">
+            {evidence.beforeWorkerCount}
+          </div>
+
+          <div className="text-slate-300 mt-1">
+            Worker Count
+          </div>
+
+        </div>
+
+        <div
+          className="
+          bg-slate-900
+          border
+          border-slate-700
+          rounded-xl
+          p-5
+          "
+        >
+
+          <div className="text-slate-400 text-sm mb-2">
+            Current State
+          </div>
+
+          <div className="text-3xl font-bold text-green-400">
+            {evidence.afterWorkerCount}
+          </div>
+
+          <div className="text-slate-300 mt-1">
+            Worker Count
+          </div>
+
+        </div>
+
+      </div>
+
+      <div
+        className="
+        mt-6
+        flex
+        items-center
+        gap-3
+        text-green-400
+        font-medium
+        "
+      >
+
+        <span>✓</span>
+
+        <span>
+          {evidence.verification}
+        </span>
+
+      </div>
+
+    </div>
+
+  )
+}
 
 export default function Dashboard() {
 
@@ -31,6 +147,8 @@ export default function Dashboard() {
   const orchestrationRef = useRef(null)
   const timelineScrollRef = useRef(null)
   const incidentListRef = useRef(null)
+  const evidenceRef = useRef(null)
+  const evidenceResult = selectedResult?.evidence_result
   const [executionVisibleAgents, setExecutionVisibleAgents] = useState(0)
   const [executionRunningIndex, setExecutionRunningIndex] = useState(-1)
   const [executionComplete, setExecutionComplete] = useState(false)
@@ -40,6 +158,7 @@ export default function Dashboard() {
   const [visibleExecutionSteps, setVisibleExecutionSteps] = useState(0)
   const [visibleValidationSteps, setVisibleValidationSteps] = useState(0)
   const [visibleResolutionSteps, setVisibleResolutionSteps] = useState(0)
+  const [incidentTimeline, setIncidentTimeline] = useState([])
 
 
   async function loadIncidents() {
@@ -92,6 +211,14 @@ export default function Dashboard() {
     const result = await orchestrateIncident(incidentId)
 
     setSelectedResult(result)
+    const now = new Date()
+
+    setIncidentTimeline([
+      {
+        time: new Date().toLocaleTimeString(),
+        event: "Incident Generated"
+      }
+    ])
     setLifecycleStatus(
       result.final_status
     )
@@ -121,6 +248,21 @@ export default function Dashboard() {
 
         setVisibleAgents(i + 1)
         setRunningAgentIndex(i)
+        const events = [
+          "Monitoring Analysis Completed",
+          "Root Cause Identified",
+          "Recovery Plan Generated",
+          "Security Validation Passed",
+          "Approval Requested"
+        ]
+
+        setIncidentTimeline(prev => [
+          ...prev,
+          {
+            time: new Date().toLocaleTimeString(),
+            event: events[i]
+          }
+        ])
         setTimeout(() => {
 
           if (timelineScrollRef.current) {
@@ -179,6 +321,14 @@ export default function Dashboard() {
 
     setLifecycleStatus("EXECUTING_RECOVERY")
 
+    setIncidentTimeline(prev => [
+      ...prev,
+      {
+        time: new Date().toLocaleTimeString(),
+        event: "Approval Granted"
+      }
+    ])
+
     setTimeout(() => {
 
       orchestrationRef.current?.scrollIntoView({
@@ -213,6 +363,14 @@ export default function Dashboard() {
       setExecutionVisibleAgents(2)
       setExecutionRunningIndex(1)
 
+      setIncidentTimeline(prev => [
+        ...prev,
+        {
+          time: new Date().toLocaleTimeString(),
+          event: "Recovery Validation Started"
+        }
+      ])
+
       setLifecycleStatus(
         "VALIDATING_RECOVERY"
       )
@@ -238,6 +396,14 @@ export default function Dashboard() {
       setExecutionVisibleAgents(3)
       setExecutionRunningIndex(2)
 
+      setIncidentTimeline(prev => [
+        ...prev,
+        {
+          time: new Date().toLocaleTimeString(),
+          event: "Resolution Finalization Started"
+        }
+      ])
+
     }, (executionCount + validationCount) * 1300)
 
     // RESOLUTION STEPS
@@ -252,10 +418,49 @@ export default function Dashboard() {
 
     setTimeout(async () => {
 
-      setExecutionRunningIndex(-1)
-      setExecutionComplete(true)
+      setExecutionVisibleAgents(4)
+      setExecutionRunningIndex(3)
 
+      setIncidentTimeline(prev => [
+        ...prev,
+        {
+          time: new Date().toLocaleTimeString(),
+          event: "Evidence Verification Started"
+        }
+      ])
+
+      await new Promise(
+        resolve => setTimeout(resolve, 1500)
+      )
+      setExecutionRunningIndex(-1)
+
+      setExecutionComplete(true)
       setLifecycleStatus("RESOLVED")
+
+      setTimeout(() => {
+
+        evidenceRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        })
+
+      }, 500)
+
+      setIncidentTimeline(prev => [
+        ...prev,
+        {
+          time: new Date().toLocaleTimeString(),
+          event: "Azure Remediation Executed"
+        },
+        {
+          time: new Date().toLocaleTimeString(),
+          event: "Evidence Verification Completed"
+        },
+        {
+          time: new Date().toLocaleTimeString(),
+          event: "Incident Resolved"
+        }
+      ])
 
       const result =
         await approveRecovery(incidentId)
@@ -486,6 +691,66 @@ export default function Dashboard() {
                 className="max-h-[700px] overflow-y-scroll pr-2"
               >
 
+                <div className="
+                  bg-slate-950
+                  border
+                  border-slate-800
+                  rounded-2xl
+                  p-6
+                  mb-6
+                  ">
+                  <h3 className="text-xl font-bold text-cyan-400 mb-4">
+                    Incident Timeline
+                  </h3>
+
+                  <div className="space-y-3">
+
+                    {incidentTimeline.map((item, index) => (
+
+                      <div
+                        key={index}
+                        className="
+                        flex
+                        items-center
+                        gap-4
+                        text-sm
+                        "
+                      >
+                        <div className="text-cyan-400 font-mono">
+                          {item.time}
+                        </div>
+
+                        <div className="text-green-400">
+                          ✓
+                        </div>
+
+                        <div className="text-slate-300">
+                          {item.event}
+                        </div>
+
+                      </div>
+
+                    ))}
+
+                  </div>
+
+                </div>
+
+                {
+                  executionComplete &&
+                  selectedResult?.evidence_result && (
+
+                    <div ref={evidenceRef}>
+
+                      <EvidenceCard
+                        evidence={evidenceResult}
+                      />
+
+                    </div>
+
+                  )
+                }
+
                 <AgentTimeline
                   result={selectedResult}
                   visibleAgents={visibleAgents}
@@ -499,6 +764,7 @@ export default function Dashboard() {
                   visibleValidationSteps={visibleValidationSteps}
                   visibleResolutionSteps={visibleResolutionSteps}
                   evidenceResult={selectedResult?.evidence_result}
+                  lessonsResult={selectedResult?.lessons_result}
                 />
 
               </div>
