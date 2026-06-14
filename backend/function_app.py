@@ -14,6 +14,7 @@ from services.execution_service import execute_recovery_plan
 from services.validation_service import validate_recovery
 from orchestration.execution_playbooks import EXECUTION_PLAYBOOKS
 from agents.evidence_agent.agent import run_evidence_agent
+from agents.lessons_learned_agent.agent import run_lessons_learned_agent
 
 app = func.FunctionApp()
 
@@ -146,7 +147,12 @@ def approve_recovery_api(req: func.HttpRequest) -> func.HttpResponse:
 
     validation_result = validate_recovery({})
     evidence_result = run_evidence_agent({
-    "previous_worker_count": str(before_worker_count)
+        "incident_type": incident.incident_type,
+        "previous_worker_count": str(before_worker_count)
+    })
+
+    lessons_result = run_lessons_learned_agent({
+        "incident_type": incident.incident_type
     })
 
     update_incident_status(
@@ -158,6 +164,7 @@ def approve_recovery_api(req: func.HttpRequest) -> func.HttpResponse:
         "execution_result": execution_result.__dict__,
         "validation_result": validation_result,
         "evidence_result": evidence_result,
+        "lessons_result": lessons_result,
         "final_status": "RESOLVED"
     }
 
